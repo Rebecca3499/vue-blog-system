@@ -2,20 +2,24 @@
   <div>
     <div class="article-list">
       <ArticleCard
-        v-for="article in articles"
+        v-for="(article, index) in articles"
         :key="article.id"
         :article="article"
+        :index="index"
       />
     </div>
 
-    <p v-if="articles.length === 0" class="empty">
-      没有找到相关文章
-    </p>
+    <EmptyState
+      v-if="articles.length === 0"
+      title="暂无文章"
+      description="没有找到符合条件的文章，请尝试更换关键词或分类。"
+    />
   </div>
 </template>
 
 <script setup>
 import ArticleCard from './ArticleCard.vue'
+import EmptyState from './common/EmptyState.vue'
 
 defineProps({
   articles: {
@@ -34,12 +38,6 @@ await sleep(1000)
 <style scoped>
 .article-list {
   display: grid;
-  gap: 16px;
-}
-
-.empty {
-  margin-top: 24px;
-  text-align: center;
-  color: #9ca3af;
+  gap: 20px;
 }
 </style>

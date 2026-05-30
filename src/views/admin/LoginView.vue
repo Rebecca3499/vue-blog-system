@@ -88,26 +88,27 @@ function goHome() {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f3f4f6;
+  background: var(--bg-page);
   font-family: Arial, sans-serif;
 }
 
 .login-card {
   width: 380px;
   padding: 32px;
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
 }
 
 .login-card h1 {
   margin: 0 0 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .login-card p {
   margin: 0 0 24px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .form-item {
@@ -117,7 +118,7 @@ function goHome() {
 .form-item label {
   display: block;
   margin-bottom: 8px;
-  color: #374151;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -125,37 +126,41 @@ function goHome() {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
   font-size: 15px;
   outline: none;
 }
 
 .form-item input:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
 }
 
 .login-button {
   width: 100%;
   padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: white;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: #ffffff;
   font-size: 16px;
   cursor: pointer;
 }
 
 .login-button:hover {
-  background: #1d4ed8;
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
 }
 
 .tip {
   margin-top: 16px;
   padding: 10px;
-  border-radius: 10px;
-  background: #f9fafb;
-  color: #6b7280;
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
   font-size: 14px;
   text-align: center;
 }
@@ -164,15 +169,16 @@ function goHome() {
   width: 100%;
   margin-top: 12px;
   padding: 10px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #e5e7eb;
-  color: #374151;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .home-button:hover {
-  background: #d1d5db;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 @media (max-width: 520px) {

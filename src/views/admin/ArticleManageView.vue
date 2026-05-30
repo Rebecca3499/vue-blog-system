@@ -84,23 +84,23 @@ function handleDelete(id) {
 .primary-button,
 .edit-button,
 .delete-button {
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
 .primary-button {
   padding: 10px 16px;
-  background: #2563eb;
-  color: white;
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .primary-button:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 .count {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .table-wrapper {
@@ -110,10 +110,11 @@ function handleDelete(id) {
 
 .table {
   min-width: 900px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: white;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
 }
 
 .table-header,
@@ -125,19 +126,19 @@ function handleDelete(id) {
 
 .table-header {
   padding: 14px 16px;
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
   font-weight: bold;
 }
 
 .table-row {
   padding: 16px;
-  border-top: 1px solid #e5e7eb;
-  color: #4b5563;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .title {
-  color: #111827;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -148,28 +149,32 @@ function handleDelete(id) {
 
 .edit-button {
   padding: 8px 12px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .edit-button:hover {
-  background: #bfdbfe;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .delete-button {
   padding: 8px 12px;
-  background: #fee2e2;
-  color: #dc2626;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
 }
 
 .delete-button:hover {
-  background: #fecaca;
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .empty {
   margin-top: 24px;
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 @media (max-width: 640px) {

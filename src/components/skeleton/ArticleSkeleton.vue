@@ -17,16 +17,22 @@
 
 .skeleton-card {
   padding: 20px;
-  border-radius: 14px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
 }
 
 .skeleton-meta,
 .skeleton-title,
 .skeleton-line {
   border-radius: 999px;
-  background: linear-gradient(90deg, #e5e7eb, #f9fafb, #e5e7eb);
+  background: linear-gradient(
+    90deg,
+    var(--bg-card-soft),
+    color-mix(in srgb, var(--primary-soft) 58%, var(--bg-card)),
+    var(--bg-card-soft)
+  );
   background-size: 200% 100%;
   animation: loading 1.4s infinite;
 }

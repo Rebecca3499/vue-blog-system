@@ -181,19 +181,20 @@ function goArticleManage() {
 
 .stat-card {
   padding: 22px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
 }
 
 .stat-card p {
   margin: 0 0 10px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .stat-card strong {
   font-size: 28px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .content-grid {
@@ -204,14 +205,15 @@ function goArticleManage() {
 
 .panel {
   padding: 24px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
 }
 
 .panel h2 {
   margin: 0 0 18px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .panel-header {
@@ -222,15 +224,17 @@ function goArticleManage() {
 
 .link-button {
   padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
   cursor: pointer;
 }
 
 .link-button:hover {
-  background: #bfdbfe;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .article-list {
@@ -240,19 +244,19 @@ function goArticleManage() {
 
 .article-item {
   padding: 16px;
-  border-radius: 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
+  border: 1px solid var(--border-color);
 }
 
 .article-item h3 {
   margin: 0 0 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .article-item p {
   margin: 0 0 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .article-meta {
@@ -264,9 +268,14 @@ function goArticleManage() {
 .article-meta span {
   padding: 4px 8px;
   border-radius: 999px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 13px;
+}
+
+:global([data-theme="dark"]) .article-meta span {
+  background: #0b1f3a;
+  color: #ffffff;
 }
 
 .category-list {
@@ -281,31 +290,31 @@ function goArticleManage() {
 }
 
 .category-name {
-  color: #111827;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .category-count {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .progress {
   height: 8px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: var(--bg-card-soft);
   overflow: hidden;
 }
 
 .progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: #2563eb;
+  background: var(--primary);
 }
 
 .empty {
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 @media (max-width: 1000px) {

@@ -141,26 +141,27 @@ function handleDeleteCategory(category) {
 }
 
 .toolbar strong {
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .tip {
   margin-left: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .primary-button {
   padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #ffffff;
   cursor: pointer;
 }
 
 .primary-button:hover {
-  background: #1d4ed8;
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
 }
 
 .category-grid {
@@ -171,9 +172,10 @@ function handleDeleteCategory(category) {
 
 .category-card {
   padding: 22px;
-  border-radius: 16px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
 }
 
 .category-header {
@@ -186,26 +188,31 @@ function handleDeleteCategory(category) {
 
 .category-header h3 {
   margin: 0 0 6px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .category-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .badge {
   padding: 6px 10px;
   border-radius: 999px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 14px;
+}
+
+:global([data-theme="dark"]) .badge {
+  background: #0b1f3a;
+  color: #ffffff;
 }
 
 .progress {
   height: 8px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: var(--bg-card-soft);
   overflow: hidden;
   margin-bottom: 18px;
 }
@@ -213,7 +220,7 @@ function handleDeleteCategory(category) {
 .progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: #2563eb;
+  background: var(--primary);
 }
 
 .article-list {
@@ -228,18 +235,19 @@ function handleDeleteCategory(category) {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
-  background: #f9fafb;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
 }
 
 .article-item span {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .article-item button {
   border: none;
   background: transparent;
-  color: #2563eb;
+  color: var(--primary);
   cursor: pointer;
 }
 
@@ -256,32 +264,36 @@ function handleDeleteCategory(category) {
 .delete-button {
   flex: 1;
   padding: 9px 12px;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
 .view-button {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .view-button:hover {
-  background: #bfdbfe;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .delete-button {
-  background: #fee2e2;
-  color: #dc2626;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
 }
 
 .delete-button:hover {
-  background: #fecaca;
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .empty {
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 @media (max-width: 900px) {

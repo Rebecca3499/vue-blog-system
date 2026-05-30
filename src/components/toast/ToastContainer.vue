@@ -43,11 +43,12 @@ const iconMap = {
   min-width: 260px;
   max-width: 360px;
   padding: 12px 14px;
-  border-radius: 12px;
-  background: white;
-  color: #111827;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  border-left: 5px solid #2563eb;
+  border: 1px solid var(--border-color);
+  border-left: 5px solid var(--info);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -55,19 +56,19 @@ const iconMap = {
 }
 
 .toast.success {
-  border-left-color: #22c55e;
+  border-left-color: var(--success);
 }
 
 .toast.error {
-  border-left-color: #ef4444;
+  border-left-color: var(--danger);
 }
 
 .toast.warning {
-  border-left-color: #f59e0b;
+  border-left-color: var(--warning);
 }
 
 .toast.info {
-  border-left-color: #3b82f6;
+  border-left-color: var(--info);
 }
 
 .icon {
@@ -82,13 +83,13 @@ const iconMap = {
 .close {
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 18px;
   cursor: pointer;
 }
 
 .close:hover {
-  color: #111827;
+  color: var(--text-primary);
 }
 
 @keyframes slideIn {
