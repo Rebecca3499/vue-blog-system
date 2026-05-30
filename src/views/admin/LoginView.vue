@@ -28,7 +28,7 @@
       </form>
 
       <div class="tip">
-        测试账号：admin / 123456
+        测试账号：Admin / 123456
       </div>
 
       <button class="home-button" @click="goHome">
@@ -50,7 +50,7 @@ const authStore = useAuthStore()
 const { showToast } = useToast()
 
 const form = reactive({
-  username: '',
+  username: 'Admin',
   password: ''
 })
 
@@ -104,6 +104,9 @@ function goHome() {
 .login-card h1 {
   margin: 0 0 8px;
   color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: 0;
 }
 
 .login-card p {

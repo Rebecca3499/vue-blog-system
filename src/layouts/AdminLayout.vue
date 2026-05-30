@@ -22,6 +22,10 @@
         <RouterLink to="/admin/categories" class="menu-item" exact-active-class="active">
           分类管理
         </RouterLink>
+
+        <RouterLink to="/admin/advanced" class="menu-item" exact-active-class="active">
+          高级特性
+        </RouterLink>
       </nav>
     </aside>
 
@@ -63,14 +67,16 @@ import AppTopBar from '../components/common/AppTopBar.vue'
 .side-brand h1 {
   margin: 0 0 6px;
   color: var(--text-primary);
-  font-size: 22px;
-  line-height: 1.2;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .side-brand p {
   margin: 0;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .menu {

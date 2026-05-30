@@ -26,10 +26,12 @@
       <section class="panel">
         <div class="panel-header">
           <h2>最近文章</h2>
-          <button class="link-button" @click="goArticleManage">查看全部</button>
+          <button class="link-button" type="button" @click="goArticleManage">
+            查看全部
+          </button>
         </div>
 
-        <div class="article-list">
+        <div v-if="recentArticles.length" class="article-list">
           <div
             v-for="article in recentArticles"
             :key="article.id"
@@ -37,26 +39,24 @@
           >
             <div>
               <h3>{{ article.title }}</h3>
-              <p>{{ article.summary }}</p>
+              <p>{{ article.summary || '暂无摘要' }}</p>
             </div>
 
             <div class="article-meta">
-              <span>{{ article.category }}</span>
-              <span>{{ article.createdAt }}</span>
-              <span>浏览 {{ article.views }}</span>
+              <span>{{ article.category || '未分类' }}</span>
+              <span>{{ article.createdAt || '-' }}</span>
+              <span>浏览 {{ Number(article.views) || 0 }}</span>
             </div>
           </div>
         </div>
 
-        <p v-if="recentArticles.length === 0" class="empty">
-          暂无文章
-        </p>
+        <p v-else class="empty">暂无文章</p>
       </section>
 
       <section class="panel">
         <h2>分类统计</h2>
 
-        <div class="category-list">
+        <div v-if="categoryStats.length" class="category-list">
           <div
             v-for="item in categoryStats"
             :key="item.name"
@@ -76,9 +76,7 @@
           </div>
         </div>
 
-        <p v-if="categoryStats.length === 0" class="empty">
-          暂无分类
-        </p>
+        <p v-else class="empty">暂无分类</p>
       </section>
     </div>
   </div>
@@ -93,6 +91,7 @@ import { useToast } from '../../components/toast/useToast'
 
 const router = useRouter()
 const articleStore = useArticleStore()
+const { showToast } = useToast()
 
 const articleCount = computed(() => {
   return articleStore.articles.length
@@ -102,6 +101,10 @@ const categoryStats = computed(() => {
   const map = {}
 
   articleStore.articles.forEach(article => {
+    if (!article.category) {
+      return
+    }
+
     if (!map[article.category]) {
       map[article.category] = 0
     }
@@ -130,7 +133,7 @@ const categoryCount = computed(() => {
 
 const totalViews = computed(() => {
   return articleStore.articles.reduce((sum, article) => {
-    return sum + article.views
+    return sum + (Number(article.views) || 0)
   }, 0)
 })
 
@@ -139,14 +142,12 @@ const latestArticleDate = computed(() => {
     return '-'
   }
 
-  return articleStore.articles[0].createdAt
+  return articleStore.articles[0].createdAt || '-'
 })
 
 const recentArticles = computed(() => {
   return articleStore.articles.slice(0, 5)
 })
-
-const { showToast } = useToast()
 
 onMounted(async () => {
   const result = await fetchDashboardStats({
@@ -156,7 +157,6 @@ onMounted(async () => {
   })
 
   if (result.code === 200) {
-    console.log('模拟接口返回：', result.data)
     showToast('后台统计数据加载完成', 'success')
   }
 })
@@ -164,7 +164,6 @@ onMounted(async () => {
 function goArticleManage() {
   router.push('/admin/articles')
 }
-
 </script>
 
 <style scoped>
@@ -181,9 +180,9 @@ function goArticleManage() {
 
 .stat-card {
   padding: 22px;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
 }
 
@@ -193,8 +192,8 @@ function goArticleManage() {
 }
 
 .stat-card strong {
-  font-size: 28px;
   color: var(--text-primary);
+  font-size: 28px;
 }
 
 .content-grid {
@@ -205,9 +204,9 @@ function goArticleManage() {
 
 .panel {
   padding: 24px;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
 }
 
@@ -218,8 +217,8 @@ function goArticleManage() {
 
 .panel-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .link-button {
@@ -244,9 +243,9 @@ function goArticleManage() {
 
 .article-item {
   padding: 16px;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--bg-card-soft);
-  border: 1px solid var(--border-color);
 }
 
 .article-item h3 {
@@ -301,9 +300,9 @@ function goArticleManage() {
 
 .progress {
   height: 8px;
+  overflow: hidden;
   border-radius: 999px;
   background: var(--bg-card-soft);
-  overflow: hidden;
 }
 
 .progress-bar {
@@ -313,8 +312,9 @@ function goArticleManage() {
 }
 
 .empty {
-  text-align: center;
+  margin: 0;
   color: var(--text-muted);
+  text-align: center;
 }
 
 @media (max-width: 1000px) {
@@ -332,16 +332,13 @@ function goArticleManage() {
     grid-template-columns: 1fr;
   }
 
-  .stat-card {
+  .stat-card,
+  .panel {
     padding: 18px;
   }
 
   .stat-card strong {
     font-size: 24px;
-  }
-
-  .panel {
-    padding: 18px;
   }
 
   .panel-header {
@@ -351,8 +348,8 @@ function goArticleManage() {
   }
 
   .article-meta {
-    flex-direction: column;
     align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

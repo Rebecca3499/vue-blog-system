@@ -7,6 +7,7 @@ import LoginView from '../views/admin/LoginView.vue'
 import DashboardView from '../views/admin/DashboardView.vue'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import CategoryManageView from '../views/admin/CategoryManageView.vue'
+import AdvancedDemoView from '../views/admin/AdvancedDemoView.vue'
 
 const routes = [
   {
@@ -47,7 +48,11 @@ const routes = [
       {
         path: 'categories',
         component: CategoryManageView
-        }
+      },
+      {
+        path: 'advanced',
+        component: AdvancedDemoView
+      }
     ]
   }
 ]

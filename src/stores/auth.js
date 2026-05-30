@@ -6,20 +6,17 @@ const USER_KEY = 'blog_user'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem(TOKEN_KEY) || '')
-  const userInfo = ref(
-    JSON.parse(localStorage.getItem(USER_KEY) || 'null')
-  )
-
+  const userInfo = ref(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
   const isLogin = ref(Boolean(token.value))
 
   function login(username, password) {
-    if (username === 'admin' && password === '123456') {
+    if (username === 'Admin' && password === '123456') {
       const mockToken = 'mock-token-' + Date.now()
 
       token.value = mockToken
       userInfo.value = {
-        username: 'admin',
-        nickname: '博客管理员'
+        username: 'Admin',
+        nickname: 'Admin'
       }
       isLogin.value = true
 

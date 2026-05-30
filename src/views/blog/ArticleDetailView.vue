@@ -33,7 +33,7 @@
               </div>
             </header>
 
-            <section class="cover" :style="coverStyle">
+            <section class="cover" :class="{ 'has-image': coverUrl }" :style="coverStyle">
               <img
                 v-if="coverUrl"
                 :src="coverUrl"
@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
@@ -101,6 +101,9 @@ const { isDark } = useTheme()
 
 const markdownRef = ref(null)
 const coverBroken = ref(false)
+const tocItems = ref([])
+const headingObserver = ref(null)
+let syncTimer = null
 
 const article = computed(() => {
   return articleStore.getArticleById(route.params.id)
@@ -111,15 +114,15 @@ const publishDate = computed(() => {
 })
 
 const displayViews = computed(() => {
-  return article.value?.views ?? 120 + Number(route.params.id || 0) * 37
+  return Number(article.value?.views) || 0
 })
 
 const likeCount = computed(() => {
-  return article.value?.likes ?? 18 + Number(route.params.id || 0) * 5
+  return Number(article.value?.likes) || 0
 })
 
 const commentCount = computed(() => {
-  return article.value?.comments ?? 3 + Number(route.params.id || 0)
+  return Number(article.value?.comments) || 0
 })
 
 const coverUrl = computed(() => {
@@ -148,31 +151,6 @@ const coverStyle = computed(() => {
   }
 })
 
-const tocItems = computed(() => {
-  if (!article.value?.content) {
-    return []
-  }
-
-  return article.value.content
-    .split('\n')
-    .map(line => {
-      const match = /^(##|###)\s+(.+)$/.exec(line.trim())
-
-      if (!match) {
-        return null
-      }
-
-      const text = match[2].replace(/[#*_`[\]()]/g, '').trim()
-
-      return {
-        id: createHeadingId(text),
-        level: match[1].length,
-        text
-      }
-    })
-    .filter(Boolean)
-})
-
 const tocMeta = computed(() => {
   const content = article.value?.content || ''
   const words = content.replace(/\s+/g, '').length
@@ -186,11 +164,14 @@ const tocMeta = computed(() => {
 })
 
 watch(
-  () => [route.params.id, article.value?.content, tocItems.value.length],
+  () => [route.params.id, article.value?.content, isDark.value],
   async () => {
     coverBroken.value = false
+    tocItems.value = []
+    disconnectHeadingObserver()
     await nextTick()
-    applyHeadingIds()
+    syncTocWithRenderedHeadings()
+    observeMarkdownHeadings()
   },
   {
     immediate: true,
@@ -198,29 +179,122 @@ watch(
   }
 )
 
-function createHeadingId(text) {
-  return `heading-${encodeURIComponent(text)
+onBeforeUnmount(() => {
+  disconnectHeadingObserver()
+  clearSyncTimer()
+})
+
+watch(
+  () => route.params.id,
+  id => {
+    if (articleStore.getArticleById(id)) {
+      articleStore.incrementViews(id)
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
+function createHeadingId(text, index) {
+  const slug = encodeURIComponent(text)
     .replace(/%/g, '')
     .replace(/[^\w-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
-    .toLowerCase()}`
+    .toLowerCase()
+
+  return `heading-${slug || 'section'}-${index + 1}`
 }
 
-function applyHeadingIds() {
-  const headings = markdownRef.value?.querySelectorAll('h2, h3')
+function syncTocWithRenderedHeadings(retryCount = 0) {
+  const preview = markdownRef.value?.querySelector('.md-editor-preview')
+  const headings = Array.from(preview?.querySelectorAll('h2, h3') || [])
 
-  if (!headings?.length) {
+  if (!headings.length) {
+    if (article.value?.content && retryCount < 6) {
+      window.setTimeout(() => {
+        syncTocWithRenderedHeadings(retryCount + 1)
+      }, 80)
+    }
+
     return
   }
 
-  headings.forEach((heading, index) => {
-    const item = tocItems.value[index]
+  const usedIds = new Set()
 
-    if (item) {
-      heading.id = item.id
+  const nextItems = headings.map((heading, index) => {
+    const text = heading.textContent?.trim() || `标题 ${index + 1}`
+    let id = createHeadingId(text, index)
+
+    while (usedIds.has(id)) {
+      id = `${id}-${usedIds.size + 1}`
+    }
+
+    usedIds.add(id)
+
+    if (heading.id !== id) {
+      heading.id = id
+    }
+
+    if (heading.dataset.tocId !== id) {
+      heading.dataset.tocId = id
+    }
+
+    return {
+      id,
+      level: Number(heading.tagName.replace('H', '')),
+      text
     }
   })
+
+  if (JSON.stringify(tocItems.value) !== JSON.stringify(nextItems)) {
+    tocItems.value = nextItems
+  }
+}
+
+function observeMarkdownHeadings(retryCount = 0) {
+  const preview = markdownRef.value?.querySelector('.md-editor-preview')
+
+  if (!preview) {
+    if (article.value?.content && retryCount < 6) {
+      window.setTimeout(() => {
+        observeMarkdownHeadings(retryCount + 1)
+      }, 80)
+    }
+
+    return
+  }
+
+  headingObserver.value = new MutationObserver(() => {
+    scheduleTocSync()
+  })
+
+  headingObserver.value.observe(preview, {
+    attributes: true,
+    childList: true,
+    subtree: true
+  })
+}
+
+function scheduleTocSync() {
+  clearSyncTimer()
+
+  syncTimer = window.setTimeout(() => {
+    syncTocWithRenderedHeadings()
+  }, 60)
+}
+
+function clearSyncTimer() {
+  if (syncTimer) {
+    window.clearTimeout(syncTimer)
+    syncTimer = null
+  }
+}
+
+function disconnectHeadingObserver() {
+  headingObserver.value?.disconnect()
+  headingObserver.value = null
 }
 
 function handleCoverError() {
@@ -363,6 +437,10 @@ function goArticles() {
   background: linear-gradient(135deg, rgba(7, 27, 51, 0.04), rgba(7, 27, 51, 0.32));
 }
 
+.cover.has-image::after {
+  display: none;
+}
+
 .cover img {
   position: absolute;
   inset: 0;
@@ -497,17 +575,35 @@ function goArticles() {
   margin: 24px 0;
   padding: 18px;
   overflow-x: auto;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background: #0b1220;
-  color: #e5f0ff;
+  background: #f8fafc !important;
+  color: #1f2937 !important;
 }
 
 .markdown-body :deep(.md-editor-preview pre code) {
   padding: 0;
   border: 0;
-  background: transparent;
-  color: inherit;
+  background: transparent !important;
+  color: inherit !important;
   white-space: pre;
+}
+
+:global([data-theme="dark"]) .markdown-body :deep(.md-editor-preview pre) {
+  border: 1px solid #334155;
+  background: #020617 !important;
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) .markdown-body :deep(.md-editor-preview pre code) {
+  background: transparent !important;
+  color: #cbd5e1 !important;
+  line-height: 1.75;
+  text-shadow: none;
+}
+
+:global([data-theme="dark"]) .markdown-body :deep(.md-editor-preview pre span) {
+  color: inherit;
 }
 
 .markdown-body :deep(.md-editor-preview table) {

@@ -50,8 +50,20 @@ defineProps({
   }
 })
 
-function scrollToHeading(id) {
-  document.getElementById(id)?.scrollIntoView({
+function scrollToHeading(id, retryCount = 0) {
+  const target = document.getElementById(id) || document.querySelector(`[data-toc-id="${id}"]`)
+
+  if (!target) {
+    if (retryCount < 6) {
+      window.setTimeout(() => {
+        scrollToHeading(id, retryCount + 1)
+      }, 80)
+    }
+
+    return
+  }
+
+  target.scrollIntoView({
     behavior: 'smooth',
     block: 'start'
   })

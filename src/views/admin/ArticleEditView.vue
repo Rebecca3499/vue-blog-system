@@ -35,14 +35,6 @@
               </datalist>
             </label>
 
-            <label class="form-item">
-              <span>状态</span>
-              <select v-model="form.status">
-                <option value="published">已发布</option>
-                <option value="draft">草稿</option>
-              </select>
-            </label>
-
             <label class="form-item form-item--wide">
               <span>摘要</span>
               <textarea
@@ -52,13 +44,51 @@
               ></textarea>
             </label>
 
-            <label class="form-item form-item--wide">
-              <span>封面图地址（可选）</span>
+            <div class="cover-field form-item form-item--wide">
+              <div class="cover-field__title">
+                <span>封面图</span>
+                <p>支持填写图片地址，也可以选择 2MB 以内的本地图片。</p>
+              </div>
+
+              <div class="cover-input-row">
+                <input
+                  v-model="form.cover"
+                  placeholder="支持 /covers/vue.jpg、https://... 或 base64 图片"
+                />
+                <button type="button" class="secondary-button" @click="triggerCoverPicker">
+                  选择本地图片
+                </button>
+                <button
+                  type="button"
+                  class="ghost-button"
+                  :disabled="!form.cover"
+                  @click="removeCover"
+                >
+                  移除封面
+                </button>
+              </div>
+
               <input
-                v-model="form.cover"
-                placeholder="https://example.com/cover.jpg"
+                ref="coverInputRef"
+                class="cover-file-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                @change="handleCoverFileChange"
               />
-            </label>
+
+              <div class="cover-preview" :class="{ empty: !form.cover || coverPreviewBroken }">
+                <img
+                  v-if="form.cover && !coverPreviewBroken"
+                  :src="form.cover"
+                  alt="文章封面预览"
+                  @error="coverPreviewBroken = true"
+                />
+                <div v-else class="cover-placeholder">
+                  <strong>{{ form.cover ? '封面预览不可用' : '暂无封面' }}</strong>
+                  <span>{{ form.cover ? '保存后前台仍会按地址尝试加载' : '未设置封面时，前台会显示渐变占位图' }}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -164,13 +194,16 @@ const form = reactive({
   title: '',
   summary: '',
   category: '',
-  status: 'published',
   cover: '',
   content: ''
 })
 
 const editorMode = ref('plain')
 const manualEditorMode = ref(false)
+const coverInputRef = ref(null)
+const coverPreviewBroken = ref(false)
+const maxCoverSize = 2 * 1024 * 1024
+const allowedCoverTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 
 const shouldSuggestMarkdown = computed(() => {
   return detectMarkdown(form.content)
@@ -188,7 +221,6 @@ watch(
       form.title = value.title || ''
       form.summary = value.summary || ''
       form.category = value.category || ''
-      form.status = value.status || 'published'
       form.cover = value.cover || value.image || value.thumbnail || ''
       form.content = value.content || ''
       editorMode.value = detectMarkdown(form.content) ? 'markdown' : 'plain'
@@ -209,11 +241,17 @@ watch(
   }
 )
 
+watch(
+  () => form.cover,
+  () => {
+    coverPreviewBroken.value = false
+  }
+)
+
 function resetForm() {
   form.title = ''
   form.summary = ''
   form.category = ''
-  form.status = 'published'
   form.cover = ''
   form.content = ''
   editorMode.value = 'plain'
@@ -235,12 +273,69 @@ function setEditorMode(mode) {
   manualEditorMode.value = true
 }
 
+function triggerCoverPicker() {
+  coverInputRef.value?.click()
+}
+
+function handleCoverFileChange(event) {
+  const file = event.target.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  if (!allowedCoverTypes.includes(file.type)) {
+    showToast('图片类型不正确，请选择 PNG、JPG、WebP 或 GIF 图片', 'warning')
+    resetCoverInput()
+    return
+  }
+
+  if (file.size > maxCoverSize) {
+    showToast('图片过大，请选择 2MB 以内的图片', 'warning')
+    resetCoverInput()
+    return
+  }
+
+  const reader = new FileReader()
+
+  reader.onload = () => {
+    if (typeof reader.result === 'string') {
+      form.cover = reader.result
+      coverPreviewBroken.value = false
+      showToast('封面图已添加', 'success')
+    } else {
+      showToast('图片读取失败，请重新选择', 'error')
+    }
+
+    resetCoverInput()
+  }
+
+  reader.onerror = () => {
+    showToast('图片读取失败，请重新选择', 'error')
+    resetCoverInput()
+  }
+
+  reader.readAsDataURL(file)
+}
+
+function removeCover() {
+  form.cover = ''
+  coverPreviewBroken.value = false
+  resetCoverInput()
+}
+
+function resetCoverInput() {
+  if (coverInputRef.value) {
+    coverInputRef.value.value = ''
+  }
+}
+
 function handleSubmit() {
   const payload = {
     title: form.title.trim(),
     summary: form.summary.trim(),
     category: form.category.trim(),
-    status: form.status,
+    status: 'published',
     cover: form.cover.trim(),
     content: form.content.trim()
   }
@@ -401,7 +496,8 @@ function goBack() {
 }
 
 .primary-button,
-.secondary-button {
+.secondary-button,
+.ghost-button {
   min-height: 40px;
   padding: 9px 16px;
   border-radius: var(--radius-sm);
@@ -428,6 +524,104 @@ function goBack() {
 .secondary-button:hover {
   border-color: var(--primary);
   color: var(--primary);
+}
+
+.ghost-button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.ghost-button:hover:not(:disabled) {
+  border-color: var(--border-color);
+  background: var(--bg-card-soft);
+  color: var(--primary);
+}
+
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.cover-field {
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-soft);
+}
+
+.cover-field__title {
+  display: grid;
+  gap: 4px;
+}
+
+.cover-field__title p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.cover-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.cover-file-input {
+  display: none;
+}
+
+.cover-preview {
+  position: relative;
+  min-height: 168px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.cover-preview img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.cover-preview.empty {
+  display: grid;
+  min-height: 168px;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 20%, var(--primary-soft), transparent 34%),
+    linear-gradient(135deg, var(--bg-card), var(--bg-card-soft));
+}
+
+.cover-placeholder {
+  display: grid;
+  gap: 6px;
+  padding: 22px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.cover-placeholder strong {
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.cover-placeholder span {
+  font-size: 13px;
+}
+
+:global([data-theme="dark"]) .cover-field,
+:global([data-theme="dark"]) .cover-preview {
+  background: #111827;
+}
+
+:global([data-theme="dark"]) .ghost-button:hover:not(:disabled) {
+  background: #0b1f3a;
+  color: #ffffff;
 }
 
 .editor-card {
@@ -576,6 +770,10 @@ function goBack() {
   .form-item--wide {
     grid-column: auto;
   }
+
+  .cover-input-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -605,7 +803,8 @@ function goBack() {
   }
 
   .primary-button,
-  .secondary-button {
+  .secondary-button,
+  .ghost-button {
     width: 100%;
   }
 }

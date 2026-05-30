@@ -13,22 +13,40 @@
         <button type="button" @click="goHome">首页</button>
         <button type="button" @click="goAdminArticles">文章</button>
         <button type="button" @click="goAdminCategories">分类</button>
+        <button type="button" @click="goAdminAdvanced">高级特性</button>
         <button type="button" @click="goAdmin">后台管理</button>
+        <button v-if="!authStore.isLogin" type="button" @click="goLogin">登录</button>
+        <button v-else type="button" class="logout-button" @click.stop.prevent="openLogoutConfirm">退出登录</button>
         <ThemeToggle />
       </nav>
 
       <div v-else class="admin-actions">
-        <span class="admin-user">Shiqi</span>
+        <span class="admin-user">{{ authStore.userInfo?.nickname || 'Admin' }}</span>
         <button type="button" @click="goHome">返回前台</button>
+        <button type="button" class="logout-button" @click.stop.prevent="openLogoutConfirm">退出登录</button>
         <ThemeToggle />
       </div>
     </div>
   </header>
+
+  <div v-if="showLogoutConfirm" class="confirm-mask" @click.self="closeLogoutConfirm">
+    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+      <h2 id="logout-title">确认退出登录？</h2>
+      <p>退出后需要重新登录才能进入后台管理。</p>
+      <div class="confirm-actions">
+        <button class="cancel-button" type="button" @click="closeLogoutConfirm">取消</button>
+        <button class="confirm-button" type="button" @click="confirmLogout">确认退出</button>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ThemeToggle from './ThemeToggle.vue'
+import { useAuthStore } from '../../stores/auth'
+import { useToast } from '../toast/useToast'
 
 defineProps({
   variant: {
@@ -39,6 +57,10 @@ defineProps({
 })
 
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+const { showToast } = useToast()
+const showLogoutConfirm = ref(false)
 
 function goHome() {
   router.push('/')
@@ -54,6 +76,34 @@ function goAdminArticles() {
 
 function goAdminCategories() {
   router.push('/admin/categories')
+}
+
+function goAdminAdvanced() {
+  router.push('/admin/advanced')
+}
+
+function goLogin() {
+  router.push({
+    path: '/login',
+    query: route.path.startsWith('/admin')
+      ? { redirect: route.fullPath }
+      : {}
+  })
+}
+
+function openLogoutConfirm() {
+  showLogoutConfirm.value = true
+}
+
+function closeLogoutConfirm() {
+  showLogoutConfirm.value = false
+}
+
+function confirmLogout() {
+  showLogoutConfirm.value = false
+  authStore.logout()
+  showToast('已退出登录', 'success')
+  router.push('/login')
 }
 </script>
 
@@ -155,6 +205,19 @@ function goAdminCategories() {
   color: #ffffff;
 }
 
+.front-nav > .logout-button,
+.admin-actions > .logout-button {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+}
+
+.front-nav > .logout-button:hover,
+.admin-actions > .logout-button:hover {
+  border-color: rgba(248, 113, 113, 0.75);
+  background: rgba(248, 113, 113, 0.16);
+  color: #ffffff;
+}
+
 .admin-user {
   padding: 6px 10px;
   border-radius: 999px;
@@ -175,6 +238,75 @@ function goAdminCategories() {
   border-color: rgba(96, 165, 250, 0.8);
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
+}
+
+.confirm-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(7, 27, 51, 0.54);
+  backdrop-filter: blur(4px);
+}
+
+.confirm-dialog {
+  width: min(100%, 420px);
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-hover);
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: 22px;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.cancel-button,
+.confirm-button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+
+.cancel-button {
+  border: 1px solid var(--border-color);
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+}
+
+.cancel-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.confirm-button {
+  border: 1px solid var(--danger);
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.confirm-button:hover {
+  filter: brightness(0.95);
 }
 
 @media (max-width: 760px) {
@@ -201,6 +333,15 @@ function goAdminCategories() {
   .admin-actions > button,
   .admin-actions :deep(.theme-toggle) {
     flex: 1 1 calc(50% - 8px);
+  }
+
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .confirm-button {
+    width: 100%;
   }
 }
 </style>

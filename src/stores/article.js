@@ -9,14 +9,23 @@ function loadArticles() {
 
   if (savedArticles) {
     try {
-      return JSON.parse(savedArticles)
+      return normalizeArticles(JSON.parse(savedArticles))
     } catch (error) {
       console.error('文章数据解析失败：', error)
-      return [...mockArticles]
+      return normalizeArticles(mockArticles)
     }
   }
 
-  return [...mockArticles]
+  return normalizeArticles(mockArticles)
+}
+
+function normalizeArticles(articleList) {
+  return articleList.map(article => ({
+    ...article,
+    views: Number(article.views) || 0,
+    likes: Number(article.likes) || 0,
+    comments: Number(article.comments) || 0
+  }))
 }
 
 export const useArticleStore = defineStore('article', () => {
@@ -36,7 +45,9 @@ export const useArticleStore = defineStore('article', () => {
       id: Date.now(),
       author: article.author || 'admin',
       createdAt: new Date().toISOString().slice(0, 10),
-      views: 0
+      views: 0,
+      likes: 0,
+      comments: 0
     })
 
     saveArticles()
@@ -61,8 +72,19 @@ export const useArticleStore = defineStore('article', () => {
     saveArticles()
   }
 
+  function incrementViews(id) {
+    const article = getArticleById(id)
+
+    if (!article) {
+      return
+    }
+
+    article.views = (Number(article.views) || 0) + 1
+    saveArticles()
+  }
+
   function resetArticles() {
-    articles.value = [...mockArticles]
+    articles.value = normalizeArticles(mockArticles)
     saveArticles()
   }
 
@@ -71,6 +93,7 @@ export const useArticleStore = defineStore('article', () => {
     getArticleById,
     addArticle,
     updateArticle,
+    incrementViews,
     deleteArticle,
     resetArticles
   }

@@ -1,15 +1,22 @@
 <template>
   <Teleport to="body">
-    <div class="toast-container">
+    <div class="toast-container" aria-live="polite">
       <div
         v-for="item in messages"
         :key="item.id"
         class="toast"
         :class="item.type"
       >
-        <span class="icon">{{ iconMap[item.type] }}</span>
+        <span class="icon">{{ iconMap[item.type] || 'i' }}</span>
         <span class="message">{{ item.message }}</span>
-        <button class="close" @click="removeToast(item.id)">×</button>
+        <button
+          class="close"
+          type="button"
+          aria-label="关闭通知"
+          @click="removeToast(item.id)"
+        >
+          x
+        </button>
       </div>
     </div>
   </Teleport>
@@ -21,10 +28,10 @@ import { useToast } from './useToast'
 const { messages, removeToast } = useToast()
 
 const iconMap = {
-  success: '✅',
-  error: '❌',
-  warning: '⚠️',
-  info: 'ℹ️'
+  success: 'OK',
+  error: 'ERR',
+  warning: '!',
+  info: 'i'
 }
 </script>
 
@@ -72,7 +79,14 @@ const iconMap = {
 }
 
 .icon {
-  font-size: 18px;
+  min-width: 34px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .message {
@@ -81,14 +95,20 @@ const iconMap = {
 }
 
 .close {
-  border: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
   background: transparent;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
 }
 
 .close:hover {
+  border-color: var(--border-color);
+  background: var(--bg-card-soft);
   color: var(--text-primary);
 }
 

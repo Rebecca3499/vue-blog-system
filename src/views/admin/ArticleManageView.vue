@@ -23,7 +23,7 @@
           <div class="title">{{ article.title }}</div>
           <div>{{ article.category }}</div>
           <div>{{ article.createdAt }}</div>
-          <div>{{ article.views }}</div>
+          <div>{{ Number(article.views) || 0 }}</div>
           <div class="actions">
             <button class="edit-button" @click="goEdit(article.id)">
               编辑

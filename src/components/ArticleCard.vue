@@ -2,6 +2,7 @@
   <article class="article-card">
     <button
       class="cover"
+      :class="{ 'has-image': coverUrl }"
       type="button"
       :style="coverStyle"
       :aria-label="`阅读文章：${article.title}`"
@@ -74,15 +75,15 @@ const coverUrl = computed(() => {
 })
 
 const displayViews = computed(() => {
-  return props.article.views ?? 120 + props.index * 23
+  return Number(props.article.views) || 0
 })
 
 const commentCount = computed(() => {
-  return props.article.comments ?? (props.article.id * 3 + props.index) % 18 + 3
+  return Number(props.article.comments) || 0
 })
 
 const likeCount = computed(() => {
-  return props.article.likes ?? (props.article.id * 7 + props.index * 5) % 60 + 12
+  return Number(props.article.likes) || 0
 })
 
 const coverText = computed(() => {
@@ -148,6 +149,10 @@ function handleCoverError() {
   background:
     radial-gradient(circle at 24% 24%, rgba(255, 255, 255, 0.38), transparent 20%),
     linear-gradient(135deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0.22));
+}
+
+.cover.has-image::after {
+  display: none;
 }
 
 .cover img {
