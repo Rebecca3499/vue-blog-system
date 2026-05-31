@@ -9,7 +9,11 @@ function loadArticles() {
 
   if (savedArticles) {
     try {
-      return normalizeArticles(JSON.parse(savedArticles))
+      const parsedArticles = normalizeArticles(JSON.parse(savedArticles))
+      const savedIds = new Set(parsedArticles.map(article => Number(article.id)))
+      const missingMockArticles = mockArticles.filter(article => !savedIds.has(Number(article.id)))
+
+      return normalizeArticles([...parsedArticles, ...missingMockArticles])
     } catch (error) {
       console.error('文章数据解析失败：', error)
       return normalizeArticles(mockArticles)
